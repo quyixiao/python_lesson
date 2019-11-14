@@ -1,13 +1,13 @@
 n = int(input("input the square's length >>>"))
-sepTop= "*"
+sepTop = "*"
 sepMid = "*"
-for i in range(0,n):
+for i in range(0, n):
     sepTop += "\t*"
     sepMid += "\t"
 else:
-    sepMid +="*"
+    sepMid += "*"
     print(sepTop)
-for i in range(0,n-1):
+for i in range(0, n - 1):
     print("\n")
     print(sepMid)
 else:
