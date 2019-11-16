@@ -24,4 +24,14 @@ for i in range(1, 10):
 
 print("=====================================")
 
+withd = 0
+for i in range(1, 10):
+    line = ''
+    for j in range(i, 10):
+        line += '%d*%d=%2d ' % (i, j, j * i)  # 表示占位符
+        withd = max(withd, len(line))
+    print("{:>{}}".format(line, withd))
+
+print("=====================================")
+
 print(3, 3, sep='&', end='    ')
