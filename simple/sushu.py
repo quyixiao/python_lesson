@@ -1,3 +1,5 @@
+import datetime
+
 n = 12577
 flag = False
 for i in range(2, n):
@@ -19,3 +21,19 @@ for i in range(2, n):
         break
 else:
     print(n, 'is a prime number .')
+
+###################################
+start = datetime.datetime.now()
+count = 0
+for x in range(2, 200000):
+    flag = True
+    for y in range(2, int(x ** 0.5) + 1):
+        if x % y == 0:
+            flag = False
+            break
+    if flag:
+        count += 1
+
+print(count)
+end = (datetime.datetime.now() - start).total_seconds()
+print(end)
