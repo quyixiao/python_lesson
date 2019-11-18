@@ -23,5 +23,7 @@ random.shuffle(list3)  # 打乱列表的元素
 print(list3)
 
 print("===============================")
+print(random.sample(['a','b','c','d'],2))
+print(random.sample(['a','a'],2))
 
 
