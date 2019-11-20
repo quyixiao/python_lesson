@@ -1,6 +1,8 @@
 import datetime
 import math
 
+#如果一个数能被素数整除，就是一个合数
+
 start = datetime.datetime.now();
 count = 1
 primenumber = []
