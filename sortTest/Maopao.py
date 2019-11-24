@@ -14,7 +14,9 @@ for i in range(0, count):
             lists[i], lists[j] = lists[j], lists[i]
 
 print(lists)
+
 print('======================================================')
+
 lists = [1, 4, 5, 2, 6, 9, 8]
 for i in range(0, count):
     for j in range(count - 1 - i):
