@@ -87,4 +87,24 @@ print(tail)
 lst = [9, 8, 7, 16, 10]
 first, *second = lst
 _, *_, tail = lst
-print(_,_,tail)
+print(_, _, tail)
+
+#  总结  _ 这个变量本身无任何语义，没有任何可读性，所以不是用来给使用的
+#  Python 中很多的库，都使用这个变量，使用十分广泛，请不要在
+
+
+lst = [1, (2, 3, 4), 5]
+_, [*_, val], *_ = lst
+print(val)
+print('+++++++++++++++++++++++++++++++++++++++')
+x, y, z = lst
+*_, f = y
+print(f)
+a = 'JAVA_HOME=/usr/bin'
+b = a.split("=")
+
+c, d = b
+print(c, d)
+print('+++++++++++++++++++++--------------------------')
+key,_,val = "java_home=/usr/bin".partition("=") # partition 表示分割
+print(val)
