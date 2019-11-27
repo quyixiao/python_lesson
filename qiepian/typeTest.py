@@ -106,5 +106,7 @@ b = a.split("=")
 c, d = b
 print(c, d)
 print('+++++++++++++++++++++--------------------------')
-key,_,val = "java_home=/usr/bin".partition("=") # partition 表示分割
+key, _, val = "java_home=/usr/bin".partition("=")  # partition 表示分割
+# 总结 ： 解构是python 提供了很好的功能，可以方便手从一个复杂结构的值
+# 配合 _使用，会更加的便利
 print(val)
