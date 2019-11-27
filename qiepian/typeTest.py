@@ -59,4 +59,32 @@ print(head, mid, tail)
 head, *mid, tail = (1, 2)
 print(head, mid, tail)
 
-#
+# 尽可能的多，但是保证他们没有
+# *list2 = list 这个是有问题的
+*body, tail = lst
+print(body, tail)
+# *body, *tail = lst
+body, *tail = lst
+print(body, tail)
+# head, *mid,*mid2, tail = lst
+head, *mid, tail = 'abcdefghijk'
+print(head, mid, tail)
+
+# 丢弃变量
+# 这是一个惯例，是一个不成文的约定 ，不是标准
+# 如果不关心一个变量，就可以定义改变变量名字为_
+# _ 是一个合法的标识符，也可以作为一个有效的变量的使用，但是定义成下划线就是希望不要被使用，除非你明确的知道这个数据
+# 需要使用
+
+lst = [9, 8, 7, 20]
+first, *second = lst
+# 如果不需要，则直接用下划线来定义变量名
+head, *_, tail = lst
+
+print(head)
+print(tail)
+
+lst = [9, 8, 7, 16, 10]
+first, *second = lst
+_, *_, tail = lst
+print('===============' + str(tail))
