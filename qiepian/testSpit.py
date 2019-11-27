@@ -27,3 +27,6 @@ for c in range(1000000):
 
 delata = (datetime.datetime.now() - start).total_seconds()
 print(delata)
+
+# 测试发现 ，其实只要增加到4 * 4 开始，方法的优势就开始了
+# 矩阵规模越大，先开辟空间比append效率更加的高
