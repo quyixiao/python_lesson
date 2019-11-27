@@ -10,5 +10,14 @@ for i in range(0, len(lists)):
         print(lists[j][i], end=' ')
     print('')
 
+print('===================================================')
+matrix = [[1, 2, 3, 10], [4, 5, 6, 11], [7, 8, 9, 12], [1, 2, 3, 4]]
+length = len(matrix)
+count = 0
+for i in range(length):
+    for j in range(i):
+        matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+        count += 1
 
-
+print(matrix)
+print(count)
