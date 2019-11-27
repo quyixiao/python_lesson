@@ -87,4 +87,4 @@ print(tail)
 lst = [9, 8, 7, 16, 10]
 first, *second = lst
 _, *_, tail = lst
-print('===============' + str(tail))
+print(_,_,tail)
