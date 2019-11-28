@@ -11,6 +11,28 @@
 # 成员运算符
 # in 和 not in 判断元素是否在set中
 # 效率呢？
+# 线性结构的查询时间复杂度是O(n)，即随机数据规模的增大而增加耗时
+# set ，dict 等结构，内部使用的是hash 值作为key ,时间复杂度可以做到 O(1) ,查询时间和数据规模无关
+# print(hash(1,'abc',[1])) list 不能作为,list 的值是可变的，如果这个值是可变的，那么用这个值作为hash值，没有什么意义
+# 可hash
+# 数值型int,float,complex
+# 布尔型 True,False
+# 字符串strings,bytes
+# tuple
+# None
+# 以上都是不可变类型，成为可哈希类型，hashtable
+# 差集，集合中除去和其他集合的公共部分
+#
+# 基本概念
+# 全集
+# 所有元素集合，例如实数集，所有的实数组成的集合就是全集
+# 子集，subset和超集superset
+# 一个集合A所有的元素都是在另一个集合B内，A是B集合的子集
+# union(*others)
+# update(*others)
+# 等同于 udpate
+#
+
 import datetime
 import timeit
 
@@ -106,3 +128,59 @@ print(-1 in set(range(10000009)))
 
 end = datetime.datetime.now()
 print(end - start)
+
+print(hash(tuple([1, 2])))
+
+# 交集
+# intersection(* others )
+# 返回和多个集合的交集
+# & 等同于 intersection
+# intersection _update(* others)
+#   获取多个集合交集并修改
+#   等同于difference _update
+#   交集用于and
+s1 = {1, 2, 3}
+s2 = {2, 3, 4}
+print(s1 > s2)
+print(s1 < s2)
+
+print(s1 == s2)
+
+s1.add(4)
+s2.add(2)
+
+print(s1)
+
+# isdisjoint 是不是有交集
+
+print(s1.isdisjoint(s2))
+print(s1 & s2 == set())
+s1.clear()
+
+print(s1 & s2 == set())
+
+# 集合应用
+# 共同好友，求共同好友
+# 有一个api,要求权限具备
+# hash(tuple(1,'abc',[1]))
+set1 = {'A','B','C'}
+set2 = {'e','f','D','C'}
+set3 = set1 & set2
+if set3 == set() :
+    print( 'xxx 与群里的其他人没有微信朋友关系')
+else :
+    print( 'xxx 与群里的其他的人有朋友关系')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
