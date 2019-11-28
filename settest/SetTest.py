@@ -163,24 +163,10 @@ print(s1 & s2 == set())
 # 共同好友，求共同好友
 # 有一个api,要求权限具备
 # hash(tuple(1,'abc',[1]))
-set1 = {'A','B','C'}
-set2 = {'e','f','D','C'}
+set1 = {'A', 'B', 'C'}
+set2 = {'e', 'f', 'D', 'C'}
 set3 = set1 & set2
-if set3 == set() :
-    print( 'xxx 与群里的其他人没有微信朋友关系')
-else :
-    print( 'xxx 与群里的其他的人有朋友关系')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+if set3 == set():
+    print('xxx 与群里的其他人没有微信朋友关系')
+else:
+    print('xxx 与群里的其他的人有朋友关系')
