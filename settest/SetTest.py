@@ -36,7 +36,6 @@
 # collection 翻译为集合类型，是一个大家的概念
 # 如果找不到元素，则会抛出异常，随机的从元素中弹出一个元素
 # in 和 not in 遍历是无序的，是按照索引来实现的，set  内部使用的是hash 值，时间复杂度可以做到O(1) ,查询时间和数据规模无关
-# hash 有一个
 
 import datetime
 import timeit
@@ -163,6 +162,7 @@ print(s1 & s2 == set())
 s1.clear()
 
 print(s1 & s2 == set())
+
 
 # 集合应用
 # 共同好友，求共同好友
