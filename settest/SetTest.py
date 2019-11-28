@@ -31,7 +31,12 @@
 # union(*others)
 # update(*others)
 # 等同于 udpate
-#
+# set 是一个可变的，无序的，不重复的，元素集合
+# 约定，set翻译为集合。
+# collection 翻译为集合类型，是一个大家的概念
+# 如果找不到元素，则会抛出异常，随机的从元素中弹出一个元素
+# in 和 not in 遍历是无序的，是按照索引来实现的，set  内部使用的是hash 值，时间复杂度可以做到O(1) ,查询时间和数据规模无关
+# hash 有一个
 
 import datetime
 import timeit
