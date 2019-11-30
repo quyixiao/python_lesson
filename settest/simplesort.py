@@ -12,3 +12,7 @@ for i in range(length):
 
 for i in lst:
     print(i, end=' ')
+
+
+
+
