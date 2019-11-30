@@ -61,3 +61,8 @@ for k in lst:
 #    d['1000'] = 100
 
 
+# key 的要求和 set 的元素要求一致
+# set 的元素可以就是看做 key ,set 可以看做是 dict 的简化版本
+# hashcode 可哈希才可以作为 key,可以使用 hash() 测试
+# d = {1:0,2.0:3 ,'abc' : None,('hello','word','python'): 'string',b'abc':135},
+
