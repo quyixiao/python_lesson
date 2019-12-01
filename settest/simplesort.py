@@ -16,3 +16,4 @@ for i in lst:
 
 
 
+#{[x] for x in range(5)}

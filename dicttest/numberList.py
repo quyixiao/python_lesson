@@ -33,7 +33,15 @@ for j in reversed(sorted(dict1.keys())):
 # 生成数据的过程和处理数据的情况怎样
 
 
+# 按照什么东西排序 ，按照key 来进行排序
+f = sorted({'a': 1, 'c': 2, 'd': 5, 'b': [1, 2, 3]}.items(), key=str)
 
+print(f)
 
+words = []
+for _ in range(100):
+    # words.append(random.choice(strs) + random.choice(strs))
+    # words.append(''.join(random.sample(strs,2)))
+    words.append(''.join(random.choice(strs) for _ in range(2))) # 生成器
 
-
+print(words)
