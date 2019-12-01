@@ -157,6 +157,37 @@ print(b)
 # 通过 next(g)  方法就可以生成可迭代对象
 # 迭代器是不可以回头的
 #
-f = list(zip(range(10),range(10)))
-for x in f :
-    print( x )
+f = list(zip(range(10), range(10)))
+for x in f:
+    print(x)
+
+print('--------------------------------------------')
+
+f = list(zip(range(10), range(10), range(10), range(10)))
+for x in f:
+    print(x)
+
+print('--------------------------------------------')
+# 只能用 list ,不能用 dict
+f = list(zip(range(10), range(10), range(2), range(10)))
+for x in f:
+    print(x)
+
+# 形式还有很多的，可以写成不同的东西
+f = dict(zip(range(10), range(10)))
+for x in f.items():
+    print(x)
+
+#
+print('+++++++++++++++++++++++++++++++++++++++==')
+print({str(x): y for x, y in zip(range(10), range(10))})
+
+
+
+
+
+print(
+    {
+        str(x): y for x, y in zip('abcdefaiodad9a', range(10))
+    }
+)
