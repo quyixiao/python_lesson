@@ -57,8 +57,10 @@ out = callable(add(4, 5))  # 函数是可调用对象
 # out = add(4, 5)
 print(out)
 
-def add1(x,y):
+
+def add1(x, y):
     return x + y
 
+
 # 在定义的时候使用
-print(add1(y=5,x=4))
+print(add1(y=5, x=4))
