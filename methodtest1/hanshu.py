@@ -63,4 +63,45 @@ def add1(x, y):
 
 
 # 在定义的时候使用
-print(add1(y=5, x=4))
+print(add1(y=9, x=4))
+# 我们东西
+print(add1(1, y=2))
+
+#  SyntaxError: positional argument follows keyword argument ,位置参数必须放到前面
+
+# print(add(x = 1 ,7))
+# print(add(5))  TypeError: add() missing 1 required positional argument: 'y'
+# print(add(x = 5 ))
+# print(add()) TypeError: add() missing 2 required positional arguments: 'x' and 'y'
+
+# print(add(y = 8 )) # TypeError: add() missing 1 required positional argument: 'x'
+
+
+# def add2(x = 5 ,y):
+#   return x + y
+# 作用
+# 参数默认值可以在未传入足够的位置参数可以使用关键字传入参数的
+# 到目前为止，我们传入的参数都是位置参数
+# 参数非常多的时候，并不需要用户每次都输入所有的参数，简化的函数调用
+# 只需要将他关注的必须要变的参数传递进来，每次进来的时候，
+
+def add4 (x,y=5):
+    return x + y
+
+print(add4(3))
+print(add4(x = 5 ))
+#print(add4(y = 3 )) TypeError: add4() missing 1 required positional argument: 'x'
+
+# 位置参数定义
+def login(host,port,username,password):
+    return host
+
+
+
+
+
+
+
+
+
+
