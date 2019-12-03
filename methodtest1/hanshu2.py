@@ -188,11 +188,33 @@ def showconfig(**keyarges):
     for k, v in keyarges.items():
         print('{} = {}'.format(k, v))
 
+
 # 可变参数
 # 有位置可变参数和关键字可变的参数
 # 位置可变参数的形参前使用一个星号
 # 位置可变参数和关键字可变参数都可以收集若干实参，位置可变参数收集形成一个tuple，关键字可变参数收集形成一个dict
 # 使用参数的时候，可变参数要放到参数列表的最后，普通参数需要放到，参数列表前面，位置可变参数需要关键字可变参数前
 # keyword-only 参数
+# 参数的情况是怎样的使用，python 的使用
+#
 
 
+def showplus(x):
+    print(x)
+    return x + 1
+    # print(x) 这个变量不会执行
+
+
+print('-------------------------------', showplus(5))
+
+
+# 这里有
+
+def guess(x):
+    if x > 3:
+        return x + 1
+    else:
+        return x + 2
+
+
+print(guess(5))
