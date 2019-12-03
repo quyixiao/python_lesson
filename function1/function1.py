@@ -98,7 +98,10 @@ foo = counter()
 print(type(foo))  # <class 'int'>
 # print(type(foo())) #<class 'function'>
 # 元组的是不可以改变的。
+print(callable(foo)) # True 这个返回的是True,
 print(foo(), foo())  # TypeError: 'int' object is not callable
-c = 100  # 这个值通过它的调用，是没有用的
-print(foo())
+c = 100  # 这个值通过它的调用，是没有用的，这个值被保留下来了，
+print(foo())  # 函数执行完成以后，这个局部变量，外部函数调用，c[] 随着函数的调用，没有结束，这个c表示的是自由变量，使用c[0] 就生成了闭包
+# 内部函数使用外部函数的自由变量，就产生了闭包，当前，并没有使用global,
 # inc() 这种方式是不可见的
+#
