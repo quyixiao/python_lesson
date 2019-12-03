@@ -191,3 +191,68 @@ print(
         str(x): y for x, y in zip('abcdefaiodad9a', range(10))
     }
 )
+
+
+
+
+def outer():
+    # 内部函数，在当前的外部环境
+    def inner():
+        print( 'inner')
+    out = 123
+    inner()
+    print('outer')
+    inner()
+
+outer()
+#print(outer().out) #AttributeError: 'NoneType' object has no attribute 'out'
+
+#inner() NameError: name 'inner' is not defined
+# 函数有可见范围，这就是作用域的概念
+# 内部函数不能被外部函数直接使用，会抛出NameError 异常
+
+# 一个标识符的范围，就是标识符的作用域， 一般来说，变量的作用域
+# 内部是可以调用外部的函数的，如果内部没有这个函数，
+x = 5
+# 本地变量在赋值的时候，就引用了
+def show():
+    #x += 1 #UnboundLocalError: local variable 'x' referenced before assignment
+    print(x )
+show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
