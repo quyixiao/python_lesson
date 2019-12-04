@@ -16,6 +16,6 @@ print(4,foo.__defaults__)
 
 
 lst = [5]
-foo(lst)
+lst = foo(lst)
 print(lst)
 print(5,foo.__defaults__)
