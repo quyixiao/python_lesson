@@ -31,4 +31,4 @@ print(next(g,' end '),) #StopIteration: 3
 # return 语句依然可以终止函数 运行，但是return 语句返回的值不能被获取到
 # return 会导致无法继续获取下一个值，抛出stopItermtion异常
 # 如果函数没有显示的return 语句，如果生成器函数执行到结尾，一样会抛出StopIterration异常
-#
+# 没有多余的，
