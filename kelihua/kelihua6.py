@@ -10,10 +10,6 @@
 # 加法的函数属于业务，能输出信息的功能，属于非法业务功能代码 ，不该入在业务函数加法中
 # 在一个函数调用的前面和后面打印这些参数，如果这些，如果有这么一些函数，我们能不能不用
 
-def add(x, y):
-    return x + y
-
-
 def logger(fn):
     def wrapper(*args, **kwargs):
         print('before', *args)
@@ -25,9 +21,15 @@ def logger(fn):
 
 
 @logger
-def add1(x, y, *, z=6): # add1 = logger(add1)
+def add1(x, y, *, z=6):  # add1 = logger(add1)
     return x + y + z
+
+
+@logger
+def add(x, y):
+    return x + y
 
 
 # 我们看看能不能正常的执行，
 add1(4, 5, z=7)  # logger(add1,4,5,z = 7 )
+add(4, 5)
