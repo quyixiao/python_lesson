@@ -35,4 +35,6 @@ print(findit(s1, s3))
 print(findit(s3, s4))
 print(findit(s3, s4))
 print(findit(s1, s5))
+# 如何取子串，只要找到一个就可以了，不是负一就找到了，像这种东西，
+#
 

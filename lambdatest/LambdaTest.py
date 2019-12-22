@@ -23,3 +23,9 @@ print((lambda *args: {x + 2 for x in args})(*range(5)))
 print([x for x in (lambda *args: map(lambda x: x + 1, args))(*range(5))])
 
 print([x for x in (lambda *args: map(lambda x: (x + 1, args), args))(*range(5))])
+
+
+
+
+
+
