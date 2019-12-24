@@ -47,6 +47,12 @@ def foo1(x, y, z):
     print('magedu', x, y, z)
 
 
+# 自定义函数
+@reg('mag', z=200, y=300, x=100)
+def foo1(x, y, z):
+    print('magedu11111111111', x, y, z)
+
+
 @reg('py', 300, b=400)
 def foo2(a, b=1000):
     print('python', a, b)
