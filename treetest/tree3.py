@@ -36,4 +36,23 @@ def print_tree(array, unit_with=2):
 
 
 
-print_tree([x + 1 for x in range(31)])
+origin = [0,30,20,80,40,50,10,60,70,90]
+total = len(origin) -1 #初始排序的元素的个数，即 n
+print(origin)
+print_tree(origin)
+
+
+def heap_adjust(n,i,array:list):
+    """
+    调整当前结点（可以算法）
+
+    :param n:
+    :param i:
+    :param array:
+    :return:
+    """
+
+
+
+
+
