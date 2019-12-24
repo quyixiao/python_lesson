@@ -5,9 +5,7 @@
 # 进行时，在输入 cmd 的时候，逗号分割，获取参数
 # 至于函数的验证，以后实现
 # 一般用户都喜欢使用单纯的一个命令如 mag , 然后直接显示想要的结果，所以采用第一种方式
-
 from functools import partial
-
 
 # 自定义函数可以直接任意参数，可变参数，keyword-only 除外
 def command_dispatcher():
