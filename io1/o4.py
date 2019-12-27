@@ -6,3 +6,8 @@ print(f.read())
 f.close()
 
 
+f = open('test','a')
+print(f.write('瞿贻晓'))
+f.close()
+
+
