@@ -16,7 +16,20 @@
 # tell() 显示文件指针当前的位置
 # seek(offset)
 # end of file
+# 文本模式支持从开头偏移
+# whence 为1 表示从当前位置开始偏移，但是只支持偏移0，相当于原始于
+# 文件指针，指向当前字节的位置
+# mode = r, 指针起始于0
+# mode = a ,指针起始于EOF
+# tell() ,显示指针当前位置
+# seek()(offset[,whence])
+# 移动文件指针的位置，offeset偏移多少字节，whence 从哪里开始
+# 文本模式位置
+# whence 0 缺省值，表示从开始，offeset只能从正数
+# whence 1 表示从位置，offeset只接受0
+# whence 2 表示从EOF开始，offset 只接受 0
 #
+
 
 f = open('test3','r+')
 
