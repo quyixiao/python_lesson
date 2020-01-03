@@ -19,7 +19,6 @@ for x in p6.iterdir():
 
 p2 = Path()
 
-
 a = list(p2.glob("_*"))
 
 print(a)
@@ -56,14 +55,4 @@ p = Path('my_text_file')
 p.write_text('工9832983982893')
 p.read_text()
 
-
-
-
-
-
-
-
-
-
-
-
+# 文件操作就是对原来的file 操作进行了封装，如果路径对我们来说是一个非常有用的操作
