@@ -14,18 +14,12 @@ p2 = Path() / 'a/b/c/d'.join(['a', 'b', 'c/d'])
 # p = Path('/etc')
 # 路径的拼接和分解
 #
-
-
 # for t in p2.parents:
 #     print(t)
-
-
 print(p2.parents[len(p2.parents) - 1])
-
 p3 = Path('a/b/c/d/tomcat.conf')
 print(p3.name)
 print(p2.name)
-
 print(p3.home())
 print(p3.stem)
 print(p3.suffix)
@@ -47,11 +41,13 @@ print(p4.is_char_device()) # 是不是一个字符设备
 print(p4.is_absolute()) # 是不是一个抽象路径 是一个绝对的路径，还是一个抽象的路径，管道文件，如果不是继承的方式是不一样的，还有一个方法
 print(p4.resolve()) #  这个找的是软链接的真正的东西，
 print(p4.absolute())
-print(p4.exists()) # 存在不？
-print(
+print(p4.exists()) # 存在不？ rmdir 删除空目录，没有提供判断目录为空的方法
+Path().touch()
 
 
-)
+p4.parent.mkdir(parent=True,exist_ok=True)
+
+
 #
 
 
