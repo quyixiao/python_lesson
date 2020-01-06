@@ -8,4 +8,35 @@
 # 序列化保存一以文件吴诗就是持久化
 # 可以将数据序列化后持久化，或者网维传输，也可以将从文件中或者网络接收到字节序列化或者反序列化
 # python 提供了pickle 库
-#
+# python 中的序列化，反序列化模块
+# dumps 对象序列化为bytes对象
+# dump 对象 没有必要将数字转换成字符串，在内存中的数据一个个的转换成，我们想要的东西，定义一个变量的时候，应该定义成什么类型
+# 类型还在，
+# m = {'x': x, 'y': y, 'z': z}
+import pickle
+
+x = 'a'
+y = 100
+z = ['a', 'b', 'c']
+m = {'x': x, 'y': y, 'z': z}
+filename = '/Users/quyixiao/ttg/qqq'
+
+# 序列化数据
+with open(filename, 'wb') as f:
+    pickle.dump(x, f)
+    pickle.dump(y, f)
+    pickle.dump(z, f)
+    pickle.dump(m, f)
+
+# 反序列化数据
+with open(filename, 'rb') as f:
+    for _ in range(4):
+        a = pickle.load(f)
+        print(a, type(a))
+
+
+
+
+
+
+
