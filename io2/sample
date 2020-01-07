@@ -1,0 +1,775 @@
+package com.lz.admin.service.crawler.impl;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.lz.admin.common.constant.MqQueueConstant;
+import com.lz.admin.common.enums.LtResourceType;
+import com.lz.admin.common.enums.PayStatusEnums;
+import com.lz.admin.common.enums.YesNoStatus;
+import com.lz.admin.common.t.Tuple;
+import com.lz.admin.common.utils.*;
+import com.lz.admin.dao.crawler.*;
+import com.lz.admin.dao.sys.ResourceMapper;
+import com.lz.admin.dto.*;
+import com.lz.admin.entity.crawler.*;
+import com.lz.admin.entity.sys.Resource;
+import com.lz.admin.entity.vo.*;
+import com.lz.admin.service.crawler.*;
+import com.lz.admin.service.sys.Resourceservice;
+import com.zf.zson.ZSON;
+import com.zf.zson.result.ZsonResult;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.*;
+
+/**
+ * <p>
+ * 拍拍乐用户信息表 服务类
+ * </p>
+ *
+ * @author quyixiao
+ * @since 2019-07-09
+ */
+
+@Service
+public class PplAccountInfoServiceImpl extends ServiceImpl<PplAccountInfoMapper, PplAccountInfo> implements PplAccountInfoService {
+
+    public final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private int ASCII_STEP = 10;
+
+    private final int DAY_OF_WEEK = 4;
+
+    private static final Gson gson = new GsonBuilder().create();
+
+    @Value("${dingtalk.url}")
+    private String NOTICE_URL;
+
+    @Value("${dingtalk.paytoken}")
+    private String ACCESS_TOKEN;
+
+    @Value("${dingtalk.weektoken}")
+    private String WEEK_TOKEN;
+
+    @Value("${dingtalk.time}")
+    private Integer TIME;
+
+    @Value("${dingtalk.totalAccount}")
+    private String TOTAL_TOKEN;
+
+    @Value("${dingtalk.dayAccount}")
+    private String DAY_TOKEN;
+
+    @Value("${ppl.partner.privatekey}")
+    private String PRIVATE_KEY;
+
+    @Autowired
+    private PplAccountInfoMapper pplAccountInfoMapper;
+
+	@Autowired
+	@Lazy
+	private PplPayInfoService pplPayInfoService;
+
+    @Autowired
+    private ResourceMapper resourceMapper;
+
+    @Autowired
+    private PplAccountLogMapper pplAccountLogMapper;
+
+    @Autowired
+    private RedisUtils redisUtils;
+
+    @Autowired
+    private PplPayInfoMapper pplPayInfoMapper;
+
+    @Autowired
+    private PplPayUrlLogMapper pplPayUrlLogMapper;
+
+    @Autowired
+    private PplAddressInfoMapper pplAddressInfoMapper;
+
+    @Autowired
+    private PplAddressInfoService pplAddressInfoService;
+
+    @Autowired
+    private SkusService skusService;
+
+    final String PPL_MAX_PAY_SINGLE = "PPL_MAX_PAY_SINGLE";
+
+    private static final Integer DISABLE_STATUS = 3;
+
+    @Autowired
+    private UserListService userListService;
+
+    @Autowired
+    private Resourceservice resourceservice;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+
+    @Autowired
+    private PplGoodsInfoService pplGoodsInfoService;
+
+    @Override
+    public PplAccountInfo selectPplAccountInfoById(Long id) {
+        return pplAccountInfoMapper.selectPplAccountInfoById(id);
+    }
+
+
+    @Override
+    public Long insertPplAccountInfo(PplAccountInfo pplAccountInfo) {
+        return pplAccountInfoMapper.insertPplAccountInfo(pplAccountInfo);
+    }
+
+
+    @Override
+    public int updatePplAccountInfoById(PplAccountInfo pplAccountInfo) {
+        return pplAccountInfoMapper.updatePplAccountInfoById(pplAccountInfo);
+    }
+
+
+    @Override
+    public int updateCoverPplAccountInfoById(PplAccountInfo pplAccountInfo) {
+        return pplAccountInfoMapper.updateCoverPplAccountInfoById(pplAccountInfo);
+    }
+
+
+    @Override
+    public int deletePplAccountInfoById(Long id) {
+        return pplAccountInfoMapper.deletePplAccountInfoById(id);
+    }
+
+
+    @Override
+    public PplAccountInfo selectPplPayInfoByAccount(String account) {
+        return pplAccountInfoMapper.selectPplAccountInfoByAccount(account);
+    }
+
+    @Override
+    public void initAccountInfo(InitAccountDto initAccountDto) {
+        PplAccountInfo pplAccountInfo = pplAccountInfoMapper.selectPplAccountInfoByAccount(initAccountDto.getAccount());
+        //修改
+        if (pplAccountInfo == null) {
+            pplAccountInfo = new PplAccountInfo();
+        }
+        pplAccountInfo.setSalt(String.valueOf(ASCII_STEP));
+        String payPwd = initAccountDto.getPayPwd();
+        String pwd = initAccountDto.getPwd();
+        String asciiPayPwd = StringUtil.stringToAscii(payPwd, ASCII_STEP);
+        String asciiPwd = StringUtil.stringToAscii(pwd, ASCII_STEP);
+        pplAccountInfo.setPayPwd(Base64Utils.encode(StringUtil.asciiToString(asciiPayPwd).getBytes()));
+        pplAccountInfo.setPwd(Base64Utils.encode(StringUtil.asciiToString(asciiPwd).getBytes()));
+        if (StringUtil.isNotBlank(initAccountDto.getStatus())) {
+            pplAccountInfo.setStatus(Integer.valueOf(initAccountDto.getStatus()));
+            pplAccountInfo.setType(3);
+        }
+        saveOrUpdate(pplAccountInfo);
+        logger.info("初始化用户数据,account:" + JSON.toJSONString(pplAccountInfo));
+    }
+
+    @Override
+    public AccountInfoVo dealAccountInfo(String account) {
+        PplAccountInfo accountInfo = pplAccountInfoMapper.selectPplAccountInfoByAccount(account);
+        if (accountInfo == null) {
+            return null;
+        }
+        //pplAccountInfoMapper.updateAccountModify(accountInfo);//更新修改时间，这里作为心跳包使用。如果设备10分钟未更新就认为离线，并发出警报
+        updateOnLineTimeRedisCache(account);
+
+        //判断账户笔数是否超限（新账户风控）每天
+        if (StringUtil.isNotBlank(accountInfo.getLimitCount())) {
+            int i = pplPayInfoMapper.countPplPayInfoByAccountTody(account);
+            if (i >= Integer.valueOf(accountInfo.getLimitCount()).intValue()) {
+                logger.info("该账户无可用支付链接, account :" + accountInfo.getAccount());
+                return null;
+            }
+        }
+
+        PplPayInfo pplPayInfo = pplPayInfoService.selectPplPayInfoByAccountProcessing(account);
+        //如果存在订单返回该订单，不存在则返回最早一个订单，并设置为该账户
+        if (pplPayInfo == null) {
+            pplPayInfoService.updateStatusByAccount(account);
+            pplPayInfo = pplPayInfoService.selectPplPayInfoByAccountProcessing(account);
+            if (pplPayInfo != null) {
+                //记录变更日志
+                PplPayUrlLog log = new PplPayUrlLog();
+                log.setPreAccount(StringUtil.EMPTY);
+                log.setCurAccount(pplPayInfo.getAccount());
+                log.setPayId(pplPayInfo.getId());
+                log.setType(0);
+                pplPayUrlLogMapper.insertPplPayUrlLog(log);
+            }
+
+        }
+        //如果还为空
+        if (pplPayInfo == null || StringUtil.isBlank(pplPayInfo.getPayUrl())) {
+            logger.info("该账户无可用支付链接, account :" + accountInfo.getAccount());
+            return null;
+        }
+
+        //资金不足，发送钉钉通知
+        Resource resourceByType = resourceMapper.selectResourceByType(LtResourceType.PPL_NOT_ENOUGH_WARN.getCode());
+        //账户金额
+        BigDecimal balance = accountInfo.getBalance();
+        if (resourceByType != null) {
+            if (StringUtil.isNotBlank(resourceByType.getValue())) {
+                //预警金额
+                BigDecimal nearAmount = new BigDecimal(resourceByType.getValue());
+                if (balance.compareTo(nearAmount) < 1) {
+                    //预警
+                    Map data = Maps.newHashMap();
+                    data.put("token", ACCESS_TOKEN);
+                    String content = "支付异常：账户资金不足:" + account + " :" + balance + " ,预警金额：" + nearAmount;
+                    data.put("content", content);
+                    data.put("time", TIME);
+                    data.put("mobiles", "15168370129,13071805156");
+                    HttpUtil.doHttpPostJsonParam(NOTICE_URL, gson.toJson(data));
+                }
+            }
+        }
+
+        //金额不够，修改账户禁用
+        Resource resourceDisable = resourceMapper.selectResourceByType(LtResourceType.PPL_DISABLE_ACCOUTN.getCode());
+        if (resourceDisable != null && StringUtil.isNotBlank(resourceDisable.getValue())) {
+            //预警金额
+            BigDecimal disableAmount = new BigDecimal(resourceDisable.getValue());
+            if (balance.compareTo(disableAmount) < 1) {
+                //预警
+                Map data = Maps.newHashMap();
+                data.put("token", ACCESS_TOKEN);
+                String content = "支付异常：账户资金低于阈值:" + account + " :" + balance + " ,阈值金额：" + disableAmount + " ,已将该用户禁用,充值后自动启用该账户";
+                data.put("content", content);
+                data.put("time", TIME);
+                data.put("mobiles", "15168370129,13071805156");
+                HttpUtil.doHttpPostJsonParam(NOTICE_URL, gson.toJson(data));
+                //禁用账户
+                accountInfo.setStatus(DISABLE_STATUS);
+                pplAccountInfoMapper.updatePplAccountInfoById(accountInfo);
+                logger.info("已将账户：" + account + "禁用");
+            }
+        }
+
+        Resource lsdResource = resourceMapper.selectResourceByType(PPL_MAX_PAY_SINGLE);
+        AccountInfoVo vo = new AccountInfoVo();
+        vo.setAccount(account);
+        vo.setPayPwd(accountInfo.getPayPwd());
+        vo.setPwd(accountInfo.getPwd());
+        vo.setPayUrl(pplPayInfo.getPayUrl());
+        if (pplPayInfo.getPayAmount() != null) {
+            vo.setPayAmount(pplPayInfo.getPayAmount().toString());
+        }
+        Optional.ofNullable(lsdResource).ifPresent(resource -> vo.setMaxMoney(resource.getValue()));
+        //返回前将该状态置为处理中
+        pplPayInfo.setStatus(PayStatusEnums.PAY_PROCESSING.getStatus());
+        pplPayInfoService.updatePplPayInfoById(pplPayInfo);
+        return vo;
+    }
+
+    //更新在线时间
+    private void updateOnLineTimeRedisCache(String account) {
+        Object ob = redisUtils.getObject(account);
+        PplAccountRedisDto redisDto = null;
+        Long now = System.currentTimeMillis();
+        if (ob != null) {
+            redisDto = (PplAccountRedisDto) ob;
+        } else {
+            redisDto = new PplAccountRedisDto();
+        }
+        redisDto.setOnLimeTime(now);
+        redisUtils.saveObjectWithOutExpire(account, redisDto);
+    }
+
+
+    @Async
+    @Override
+    public void noticThirdStatus(Map<String, String> map, Long pid, String url) {
+        logger.info("noticThirdStatus 获取数据：" + JSON.toJSONString(map));
+        try {
+            //payAccount 不进行验签
+            String payAccount = map.get("payAccount");
+            map.remove("payAccount");
+
+            String signStr = StringUtil.getSignStr(map);
+            if (YesNoStatus.YES.NAME.equals(map.get("status"))) {
+                map.put("payAccount", payAccount);
+            }
+            String sign = SignUtil.sign(signStr, PRIVATE_KEY);
+            map.put("sign", sign);
+            logger.info("通知拍拍乐请求数据：" + JSON.toJSONString(map) + " .url:" + url);
+            String res = HttpUtil.doHttpPostJsonParam(url, gson.toJson(map));
+            logger.info("通知拍拍乐响应数据：" + res);
+            if (res.contains("\"code\":200")) {//更新回调状态
+                logger.info("更新回调状态, pid : " + pid);
+                pplPayInfoService.updateCallStatusById(pid);
+            }
+        } catch (Exception e) {
+            logger.info("通知拍拍乐异常", e);
+        }
+    }
+
+    @Override
+    public void statisticsAccountForDingTalk() {
+        //获取发送内容
+        String total = statisticsTotal();
+        String day = statisticsDay();
+        //发送钉钉通知
+        sendDingTalk(NOTICE_URL, TOTAL_TOKEN, total);
+        sendDingTalk(NOTICE_URL, DAY_TOKEN, day);
+        System.out.println(total + "\n" + day);
+    }
+
+    private String statisticsTotal() {
+        List<AccountNoticeVo> noticeVos = pplAccountInfoMapper.statisticsTotal();
+        StringBuffer sb = new StringBuffer();
+        sb.append("截止目前账户信息统计如下：");
+        noticeVos.forEach(accountNoticeVo -> {
+            sb.append("\r\n");
+            sb.append("支付宝账户:" + accountNoticeVo.getAccount() +
+                    "  总充值金额:" + accountNoticeVo.getInvestAmount() +
+                    "  总支付笔数:" + accountNoticeVo.getPayNum() +
+                    "  总支付金额:" + accountNoticeVo.getPayAmount() +
+                    "  总测试笔数:" + accountNoticeVo.getTestNum() +
+                    "  总测试金额:" + accountNoticeVo.getTestAmount() +
+                    "  总余额:" + accountNoticeVo.getAmount() +
+                    "  总收益:" + accountNoticeVo.getIncomeAmount());
+        });
+        //统计累计信息
+        AccountNoticeVo noticeVo = calcuAccount(noticeVos);
+        sb.append("\r\n");
+        sb.append("账户总和:" +
+                "  充值金额:" + noticeVo.getInvestAmount() +
+                "  支付笔数:" + noticeVo.getPayNum() +
+                "  支付金额:" + noticeVo.getPayAmount() +
+                "  测试笔数:" + noticeVo.getTestNum() +
+                "  测试金额:" + noticeVo.getTestAmount() +
+                "  余额:" + noticeVo.getAmount() +
+                "  收益" + noticeVo.getIncomeAmount());
+        sb.append("\r\n");
+        sb.append("以上为累计账户信息统计");
+        return sb.toString();
+
+    }
+
+    private String statisticsDay() {
+        List<AccountNoticeVo> noticeVos = pplAccountInfoMapper.statisticsDay();
+        StringBuffer sb = new StringBuffer();
+        sb.append("当天账户信息统计如下：");
+        //当天充值金额先置为0
+        noticeVos.forEach(accountNoticeVo -> {
+            sb.append("\r\n");
+            sb.append("支付宝账户:" + accountNoticeVo.getAccount() +
+                    "  当天充值金额:" + accountNoticeVo.getInvestAmount() +
+                    "  当天支付笔数:" + accountNoticeVo.getPayNum() +
+                    "  当天支付金额:" + accountNoticeVo.getPayAmount() +
+                    "  当天测试笔数:" + accountNoticeVo.getTestNum() +
+                    "  当天测试金额:" + accountNoticeVo.getTestAmount() +
+                    "  当天收益:" + accountNoticeVo.getIncomeAmount());
+        });
+        //统计累计信息
+        AccountNoticeVo noticeVo = calcuAccount(noticeVos);
+        sb.append("\r\n");
+        sb.append("账户总和:" +
+                "  充值金额:" + noticeVo.getInvestAmount() +
+                "  支付笔数:" + noticeVo.getPayNum() +
+                "  支付金额:" + noticeVo.getPayAmount() +
+                "  测试笔数:" + noticeVo.getTestNum() +
+                "  测试金额:" + noticeVo.getTestAmount() +
+                "  余额:" + noticeVo.getAmount() +
+                "  收益" + noticeVo.getIncomeAmount());
+        sb.append("\r\n");
+        sb.append("以上为 " + DateUtil.formatDateToYYYYMMddStr(new Date()) + " 日账户信息统计");
+        return sb.toString();
+    }
+
+
+    private AccountNoticeVo calcuAccount(List<AccountNoticeVo> noticeVos) {
+        BigDecimal investAmount = new BigDecimal(0);
+        BigDecimal payNum = new BigDecimal(0);
+        ;
+        BigDecimal payAmount = new BigDecimal(0);
+        ;
+        BigDecimal testNum = new BigDecimal(0);
+        ;
+        BigDecimal testAmount = new BigDecimal(0);
+        ;
+        BigDecimal amount = new BigDecimal(0);
+        BigDecimal incomeAmount = new BigDecimal(0);
+        AccountNoticeVo noticeVo = new AccountNoticeVo();
+        for (AccountNoticeVo vo : noticeVos) {
+            investAmount = BigDecimalUtil.add(new BigDecimal(vo.getInvestAmount()), investAmount);
+            payNum = BigDecimalUtil.add(new BigDecimal(vo.getPayNum()), payNum);
+            payAmount = BigDecimalUtil.add(new BigDecimal(vo.getPayAmount()), payAmount);
+            testNum = BigDecimalUtil.add(new BigDecimal(vo.getTestNum()), testNum);
+            testAmount = BigDecimalUtil.add(new BigDecimal(vo.getTestAmount()), testAmount);
+            amount = BigDecimalUtil.add(new BigDecimal(vo.getAmount()), amount);
+            incomeAmount = BigDecimalUtil.add(new BigDecimal(vo.getIncomeAmount()), incomeAmount);
+        }
+        noticeVo.setInvestAmount(investAmount.toString());
+        noticeVo.setPayNum(payNum.toString());
+        noticeVo.setPayAmount(payAmount.toString());
+        noticeVo.setTestNum(testNum.toString());
+        noticeVo.setTestAmount(testAmount.toString());
+        noticeVo.setAmount(amount.toString());
+        noticeVo.setIncomeAmount(incomeAmount.toString());
+        return noticeVo;
+
+    }
+
+    private void sendDingTalk(String url, String token, String content) {
+        Map data = Maps.newHashMap();
+        data.put("token", token);
+        data.put("content", content);
+        String result = HttpUtil.doHttpPostJsonParam(url, gson.toJson(data));
+        logger.info("发送钉钉通知返回：" + result);
+    }
+
+
+    @Override
+    public void updateAccountAmountAddLog(String account, PplUpdateAccountDto accountDto) {
+        logger.info("获取更新资产信息， accountDto：" + JSON.toJSONString(accountDto));
+
+        if (StringUtil.isBlank(account)) {
+            return;
+        }
+        if (accountDto.getChangeBalnace() == null || accountDto.getChangeBalnace().compareTo(BigDecimal.ZERO) == 0) {
+            return;
+        }
+
+        PplAccountInfo info = pplAccountInfoMapper.selectAllPplAccountInfoByAccount(account);
+        if (info == null) {
+            logger.info("未找到此账户信息 account: " + account);
+            return;
+        }
+        PplAccountLog log = new PplAccountLog();
+        log.setChangeBalnace(accountDto.getChangeBalnace());
+        log.setSerNo(accountDto.getSerNo());
+        log.setType(accountDto.getType());
+        log.setRefId(accountDto.getRefId());
+
+        log.setAccountId(info.getId());
+        log.setPreBalance(info.getBalance());
+        log.setCurBalance(BigDecimalUtil.add(info.getBalance(), log.getChangeBalnace()));
+        pplAccountLogMapper.insertPplAccountLog(log);
+        logger.info("增加资产日志信息：" + JSON.toJSONString(log));
+
+        logger.info("更新前更新资产信息， account：" + account + ",balance: " + info.getBalance());
+
+        pplAccountInfoMapper.updatePplAccountInfoBalance(info.getId(), accountDto.getChangeBalnace().doubleValue());
+        logger.info("更新后资产信息， account：" + account + ",balance: " + info.getBalance());
+    }
+
+
+    @Override
+    public List<PplAvailableAccountVo> selectAvaliableAccountInfo() {
+        List<PplAvailableAccountVo> pplAvailableAccountVos = pplAccountInfoMapper.selectAvaliableAccountInfo();
+        //alipay0 暂为测试账户 不需要返回
+        return pplAvailableAccountVos;
+    }
+
+    @Override
+    public void saveOrUpdate(PplAccountInfo pplAccountInfo) {
+        if (pplAccountInfo.getId() != null) {
+            pplAccountInfoMapper.updatePplAccountInfoById(pplAccountInfo);
+        } else {
+            pplAccountInfoMapper.insertPplAccountInfo(pplAccountInfo);
+
+        }
+    }
+
+    @Override
+    public void setAccountDanger(String account, String desc) {
+        pplAccountInfoMapper.setAccountDanger(account, desc);
+    }
+
+    @Override
+    public List<String> getDangerAccount() {
+        return pplAccountInfoMapper.getDangerAccount();
+    }
+
+    @Override
+    public List<String> getSafeAccount() {
+        return pplAccountInfoMapper.getSafeAccount();
+    }
+
+    @Override
+    public List<PplAccountInfo> getAllSafeAccount() {
+        return pplAccountInfoMapper.getAllSafeAccount();
+    }
+
+    @Override
+    public void updatePplAccountInfoToDangerByIds(List<PplAccountInfo> changeAccount) {
+        pplAccountInfoMapper.updatePplAccountInfoToDangerByIds(changeAccount);
+    }
+
+
+    @Override
+    public PplAccountInfo selectAllPplPayInfoByAccount(String account) {
+        return pplAccountInfoMapper.selectAllPplAccountInfoByAccount(account);
+    }
+
+    @Override
+    public AccountAdressInfoVo dealAddressInfo(PplQueryAddressDto dto) {
+
+        PplAccountInfo pplAccountInfo = new PplAccountInfo();
+        AccountAdressInfoVo vo = new AccountAdressInfoVo();
+        // 抢占一个
+        int i = pplAddressInfoMapper.updateAddressStatusBySerialNoProcessing(dto.getSerialNo());
+        if (i > 0) {
+            PplAddressInfo pplAddressInfo = pplAddressInfoMapper.selectPplAddressInfoBySerialProcessing(dto.getSerialNo());
+            if (pplAddressInfo != null) {
+                pplAccountInfo = pplAccountInfoMapper.selectPplAccountInfoById(pplAddressInfo.getAccountId());
+                BeanUtils.copyProperties(pplAccountInfo, vo);
+                BeanUtils.copyProperties(pplAddressInfo, vo);
+                vo.setUsername(pplAccountInfo.getUsername());
+            }
+        }
+        return vo;
+    }
+
+
+    @Override
+    public void statisticsHourForDingTalk() {
+
+        AccountNoticeVo noticeVo = pplAccountInfoMapper.statisticsHourForDingTalk();
+        StringBuffer sb = new StringBuffer();
+        String time = DateUtil.formatDate(new Date(), DateUtil.DEFAULT_CHINESE_FULL_PATTERN);
+        sb.append(time + "\r\n")
+                .append("支付笔数：" + noticeVo.getPayNum() + "\r\n")
+                .append("支付金额：" + noticeVo.getPayAmount() + "\r\n")
+                .append("收益：" + noticeVo.getIncomeAmount() + "\r\n")
+                .append("件均：" + noticeVo.getNumberAverage() + "\r\n")
+                .append("件均收益：" + noticeVo.getAverageIncome() + "\r\n")
+                .append("七日年化：" + noticeVo.getSevenAnnual() + "\r\n")
+                .append("测试笔数：" + noticeVo.getTestNum() + "\r\n")
+                .append("测试金额：" + noticeVo.getTestAmount());
+        sendDingTalk(NOTICE_URL, TOTAL_TOKEN, sb.toString());
+    }
+
+    @Override
+    public void statisticsWeekTargetForDingTalk() {
+        Date startTime = null;
+        Date endTime = null;
+        int dayNum = DateUtil.getCurrentDayNum();
+        if (dayNum >= DAY_OF_WEEK) {
+            startTime = getTimeInterval(DAY_OF_WEEK, 0);
+            endTime = getTimeInterval(DAY_OF_WEEK, 1);
+        } else {
+            startTime = getTimeInterval(DAY_OF_WEEK, -1);
+            endTime = getTimeInterval(DAY_OF_WEEK, 0);
+        }
+        WeekTargetVo vo = pplAccountInfoMapper.statisticsWeekTargetForDingTalk(startTime, endTime);
+        StringBuffer sb = new StringBuffer();
+        String time = DateUtil.formatDate(new Date(), DateUtil.DEFAULT_CHINESE_FULL_PATTERN);
+        Resource resource = resourceMapper.selectResourceByType(LtResourceType.PPL_DING_NOTICE.getCode());
+        sb.append("环境：" + SpringContextUtils.getActiveProfile() + "\r\n");
+        sb.append(time + " 通知: \r\n")
+                .append("计划周期：" + DateUtil.formatDate(startTime, DateUtil.DEFAULT_CHINESE_PATTERN) + " - " + DateUtil.formatDate(endTime, DateUtil.DEFAULT_CHINESE_PATTERN) + "\r\n")
+                .append("目标单量：" + resource.getValue() + "\r\n")
+                .append("累计单量：" + vo.getTotalNum() + "\r\n")
+                .append("测试单量：" + vo.getTestNum() + "\r\n")
+                .append("完成度：" + BigDecimalUtil.divHalfUp(new BigDecimal(vo.getTotalNum()), new BigDecimal(resource.getValue()), 4).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_UP) + "%");
+        sendDingTalk(NOTICE_URL, WEEK_TOKEN, sb.toString());
+    }
+
+    @Override
+    public R saveSkus(PplGoodsInfoDto dto) {
+        logger.info("请求参数 ： \n" + dto.getZson());
+        String content = dto.getZson();
+        // 获取商品基本信息
+        Long goodsID = ZSONUtils.getLong(content,"/store/initDataObj/goods/goodsID");
+        String goodsDesc = ZSONUtils.getString(content,"/store/initDataObj/goods/goodsDesc");
+        String goodsName = ZSONUtils.getString(content,"/store/initDataObj/goods/goodsName");
+        String shareDesc = ZSONUtils.getString(content,"/store/initDataObj/goods/shareDesc");
+        Integer priceStyle = ZSONUtils.getInteger(content,"/store/initDataObj/goods/priceStyle");
+
+        logger.info(" goodsID ={},goodsName={},goodsDesc={},shareDesc={},priceStyle={}", goodsID, goodsName, goodsDesc, shareDesc,priceStyle);
+
+        // 删除不要的 goods skus info
+        skusService.updateIsDeleteByGoodsId(goodsID);
+        // 获取商品店铺信息
+        String groupTypeDecode = UnicodeUtil.unicode2Str(ZSONUtils.getString(content,"/store/initDataObj/goods/groupTypes"));
+        List<PplGroupTypesDto> groupTypesDtos = JSONObject.parseArray(groupTypeDecode, PplGroupTypesDto.class);
+
+        // 获取店铺 id,取最后一个
+        Long groupId = (groupTypesDtos != null && groupTypesDtos.size() > 0) ? groupTypesDtos.get(groupTypesDtos.size() - 1).getGroupID() : 0l;
+        logger.info(" goodsID ={},groupId ={}", goodsID, groupId);
+
+        // 获取商品规格信息
+        String skus = UnicodeUtil.unicode2Str(ZSONUtils.getString(content,"/store/initDataObj/goods/skus"));
+        List<PplGoodSpecsDto> goodSpecsDtos = JSONObject.parseArray(skus, PplGoodSpecsDto.class);
+        for (PplGoodSpecsDto pplGoodSpecsDto : goodSpecsDtos) {
+            logger.info(" goodsID=" + goodsID + " " + pplGoodSpecsDto.getSpecs() + " groupPrice = " + pplGoodSpecsDto.getGroupPrice() + " oldGroupPrice = " + pplGoodSpecsDto.getOldGroupPrice());
+            Skus skusEntity = new Skus();
+            BeanUtils.copyProperties(pplGoodSpecsDto, skusEntity);
+            skusEntity.setGoodsId(goodsID);
+            skusEntity.setGoodsDesc(goodsDesc);
+            skusEntity.setGoodsName(goodsName);
+            skusEntity.setShareDesc(shareDesc);
+            skusEntity.setGroupId(groupId);
+            skusEntity.setPriceStyle(priceStyle);
+            skusEntity.setSkuId(pplGoodSpecsDto.getSkuID());
+            // 保存商品规格信息
+            skusService.insertSkus(skusEntity);
+        }
+        return R.ok();
+    }
+
+
+
+
+    @Override
+    public R saveSkus1(PplGoodsInfoDto dto) {
+        logger.info("请求参数 ： \n" + dto.getZson());
+
+        ZsonResult zsonResult = ZSON.parseJson(dto.getZson());
+        // 获取商品基本信息
+        Long goodsID = zsonResult.getLong("/store/initDataObj/goods/goodsID");
+        String goodsDesc = zsonResult.getString("/store/initDataObj/goods/goodsDesc");
+        String goodsName = zsonResult.getString("/store/initDataObj/goods/goodsName");
+        String shareDesc = zsonResult.getString("/store/initDataObj/goods/shareDesc");
+        Integer priceStyle = zsonResult.getInteger("/store/initDataObj/goods/priceStyle");
+
+        logger.info(" goodsID ={},goodsName={},goodsDesc={},shareDesc={},priceStyle={}", goodsID, goodsName, goodsDesc, shareDesc,priceStyle);
+
+        // 删除不要的 goods skus info
+        skusService.updateIsDeleteByGoodsId(goodsID);
+        // 获取商品店铺信息
+        String groupTypeDecode = UnicodeUtil.unicode2Str(zsonResult.getString("/store/initDataObj/goods/groupTypes"));
+        List<PplGroupTypesDto> groupTypesDtos = JSONObject.parseArray(groupTypeDecode, PplGroupTypesDto.class);
+
+        // 获取店铺 id,取最后一个
+        Long groupId = (groupTypesDtos != null && groupTypesDtos.size() > 0) ? groupTypesDtos.get(groupTypesDtos.size() - 1).getGroupID() : 0l;
+        logger.info(" goodsID ={},groupId ={}", goodsID, groupId);
+
+        // 获取商品规格信息
+        String skus = UnicodeUtil.unicode2Str(zsonResult.getString("/store/initDataObj/goods/skus"));
+        List<PplGoodSpecsDto> goodSpecsDtos = JSONObject.parseArray(skus, PplGoodSpecsDto.class);
+        for (PplGoodSpecsDto pplGoodSpecsDto : goodSpecsDtos) {
+            logger.info("goodsID=" + goodsID + " " + pplGoodSpecsDto.getSpecs() + " groupPrice = " + pplGoodSpecsDto.getGroupPrice() + " oldGroupPrice = " + pplGoodSpecsDto.getOldGroupPrice());
+            Skus skusEntity = new Skus();
+            BeanUtils.copyProperties(pplGoodSpecsDto, skusEntity);
+            skusEntity.setGoodsId(goodsID);
+            skusEntity.setGoodsDesc(goodsDesc);
+            skusEntity.setGoodsName(goodsName);
+            skusEntity.setShareDesc(shareDesc);
+            skusEntity.setGroupId(groupId);
+            skusEntity.setPriceStyle(priceStyle);
+            skusEntity.setSkuId(pplGoodSpecsDto.getSkuID());
+            // 保存商品规格信息
+            skusService.insertSkus(skusEntity);
+        }
+        return R.ok();
+    }
+
+    @Override
+    public RiskModel riskModel(PplRiskModelDto model) {
+        List<RiskUserInfoDto> riskUserInfoDtos = new ArrayList<>();
+        int transferUser = 0;
+        // 线上 GOOD_USER_COUNT_CCBBFE302FCB
+        Resource resource = resourceservice.selectResourceByType(LtResourceType.GOOD_USER_COUNT.getCode() + "_" + model.getSerialNo());
+        int goodUserCount = resource != null ? NumberUtil.objToIntDefault(resource.getValue(), 3) : 3;
+        if (model.getClear() == 1) { //表示要清除以前的手机
+            userListService.deleteAllUserList();
+        } else {
+            //取 resource 中配置中的值
+            List<UserList> userLists = userListService.selectByStatus(0, model.getSerialNo(), goodUserCount - model.getRunCount());
+            if (CollectionUtils.isNotEmpty(userLists)) {
+                List<Long> ids = new ArrayList<>();
+                for (UserList u : userLists) {
+                    riskUserInfoDtos.add(new RiskUserInfoDto(u.getUsername()));
+                    ids.add(u.getId());
+                }
+                userListService.batchUpdateStatus(ids, 1);
+            }
+            logger.info("riskUserInfoDtos size = " + riskUserInfoDtos.size());
+            if (riskUserInfoDtos.size() < goodUserCount) {
+                logger.info("需要重新上传数据 ");
+                transferUser = 1;
+            }
+        }
+
+        Resource resourceByType = resourceMapper.selectResourceByType(LtResourceType.GOOD_LIST_LIMIT.getCode());
+        int limit = resourceByType != null ? NumberUtil.objToIntDefault(resourceByType.getValue(), 0) : 0;
+
+        if(limit > 0){
+            logger.info("resource设置了，不允许加入 .... ");
+            return new RiskModel(riskUserInfoDtos,0,"resource设置了，不允许加入");
+        }
+
+        int count = pplGoodsInfoService.selectCanDownUseGoodsInfos();
+        if(count <= 0 ){
+            logger.info("今天商品都已经下单完全 .... ");
+            return new RiskModel(riskUserInfoDtos,0,"今天商品都已经下单完全");
+        }
+
+        Date time = DateUtil.addHoures(new Date(), Constant._3_hours);
+        count = userListService.countUser(model.getSerialNo());
+        if(count >= 500){
+            logger.info("排队的队列超过500个限制 .... ");
+            return new RiskModel(riskUserInfoDtos,0,"排队的队列超过500个限制 ");
+        }
+
+        //加入到队列中
+        String usernames = model.getUsernames();
+        if (StringUtil.isNotBlank(usernames)) {
+            String date = DateUtil.yyyy_MM_dd_HH_mm_ss(new Date());
+            for (String username : usernames.split(",")) {
+                List<PplGoodsInfo> canGoodsInfos = pplGoodsInfoService.selectAllCanUseGoodsInfos(null,username,ArrayUtils.getList(0, 1),time,1);
+                if(CollectionUtils.isEmpty(canGoodsInfos)){
+                    logger.info("没有符合用户的商品可下单，不需要风控 " + username);
+                    continue;
+                }
+                UserList userList = userListService.selectUserByUserNameSerialNoStatus(username,model.getSerialNo(),0);
+                if(userList != null && userList.getId() > 0 ){
+                    logger.info("存在用户在list 中，不需要风控 " + username);
+                    continue;
+                }
+                rabbitTemplate.convertAndSend(MqQueueConstant.USER_LIST_QUEUE, new Tuple(username,model.getSerialNo(), ch.qos.logback.classic.Logger.threadLocalNo.get(),date));
+            }
+        }
+        return new RiskModel(riskUserInfoDtos,transferUser);
+    }
+
+    @Override
+    public PplAccountInfo selectPplAccountInfoByUsername(String username) {
+        return pplAccountInfoMapper.selectPplAccountInfoByUsername(username);
+    }
+
+    @Override
+    public List<PplAccountInfo> selectAddRess(Date date) {
+
+        return pplAccountInfoMapper.selectAddRess(date);
+    }
+
+    /**
+     * @param day        周几
+     * @param weekOffset 偏移量  0 本周 -1 上周  1 下周
+     * @return
+     *
+     *
+     */
+    private static Date getTimeInterval(int day, int weekOffset) {
+        Calendar calendar1 = Calendar.getInstance();
+        int dayOfWeek = DateUtil.getCurrentDayNum();
+        int offset1 = day - dayOfWeek;
+        calendar1.add(Calendar.DATE, offset1 + 7 * weekOffset);
+        return calendar1.getTime();
+    }
+
+
+}
