@@ -72,8 +72,12 @@
 # foo 是方法的对象，不是普通的函数对象 function
 # 它一般可以是 self ，self 只是一个惯用的用法
 # 可以换名字，这个参数的位置就留给 self 了
-# 
-
+# 分析日志很重要，通过学幼师数据分析就能够知道是不遭受到了攻击，是不被爬取及爬取高峰期，是否有盗链等
+# 百度爬虫名称
+# 谷歌爬虫名称
+#       目前实现的代码中，只能的接受一个文件，目录的, 如果
+# 获取 log 的文件目录，文件名前缀，综合利用一下
+# 类的对象及其属性，实例化，
 class A :
     """A example class """
     x = 1 # 类属性
@@ -81,7 +85,8 @@ class A :
         print(self.x)
 
 class Person:
-    def __init__(self,name):
+    def __init__(self,name):# 前后都有下划线的方法，我们称为魔术方法，初始化方法，当我们构造一个实例的过程，我们称为魔术方法
+        #
         print(name)
 
 
@@ -89,3 +94,14 @@ print(A.show)
 print(A.x)
 print(A.__doc__)
 
+a = A()
+
+
+#  调用就是将实例和方法绑定在一起
+#
+
+print( A().show())
+print(hex(id(A.show)))
+#__init__方法
+# MyClass() 实际上调用提是__init__(self) 方法，可以不定义，如果没有定义会在实例化后隐式调用
+#
