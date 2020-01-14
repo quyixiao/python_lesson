@@ -11,11 +11,10 @@ class Person:
     def age(self,age):
         self.__age = age
 
-
-
     @age.deleter
     def age(self):
         print('del age ')
+
 
 tom = Person('tom',20)
 print(tom.age)
