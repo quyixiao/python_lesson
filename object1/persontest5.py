@@ -24,5 +24,6 @@ print(tom.showage())  #
 print(tom.__dict__)  # {'name': 'jerry', '_Person__age': 20, '__age': 20000} , _Person__age 私有属性是在类的定义中
 tom._Person__age = 3000 # 在 python 中，在字典中是可以修改的，python 的隐患极大
 tom.showage()
-
+# 新的名称，也没有东西是
+#
 

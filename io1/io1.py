@@ -22,3 +22,4 @@ f = open('test','w')
 f.write("8939832")
 f.close()  # 关闭
 
+
