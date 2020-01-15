@@ -7,7 +7,13 @@
 # Mixin 通常不能独立的工作，因为它是准备混入别的类的功能实现
 # Mixin 类通常在继承列表中的第一个位置，例如 class PrintableWord (PringableMixin,Word):pass
 # Mixin 类和装饰器
-#
+# 这两种方式都可以使用，看个人喜好
+# 如果不需要就继承就是使用 Mixin 类的方式
+# 达到我的目的都是好方法，
+# 后面，会讲
+# 练习
+
+
 class Document:
     def __init__(self, content):
         self.content = content
