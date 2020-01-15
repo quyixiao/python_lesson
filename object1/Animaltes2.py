@@ -7,16 +7,13 @@ class Animal:
     def shout(self):
         print('Animal shuts ')
 
-
 class Cat(Animal):
     x = 'abc'
-
     def __init__(self):
         self.y = 'xyz'
 
     def shout(self):
         print('Maio')
-
 
 a = Animal()
 a.shout()
