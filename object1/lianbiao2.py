@@ -1,11 +1,13 @@
-#
+# bisect.bisect_left(a,x,lo=0,hi=len(a)) 或者 bisect.bisect(a,x,lo=0,hi=len(10))
+# 和 bisect_left类似，但是如果
+# 二分
+# bisect系，
 import bisect
 
 origin = [37, 99, 73, 48, 47, 39, 41, 25, 99, 51]
 sorted_list = sorted(origin)
 nums = [20, 40, 42, 100, 210, 5]
 print(list(enumerate(sorted_list)))
-
 
 #
 # def bi_insert_sort(origin, num):
