@@ -8,5 +8,4 @@ score = 55
 a = bisect.bisect(breakpoint,score)
 
 
-
 print(a,grades[a])
