@@ -1,11 +1,12 @@
 # 有二十数字，两两配对，关键是如何分析这个
 from object1.Randomtst import RandomGenerator1
 
-
 class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+
 
     def __repr__(self):
         return "<Point {}:{}>".format(self.x,self.y)
