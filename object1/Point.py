@@ -1,14 +1,15 @@
+#
+
 class Point:
-    def __init__(self,x,y):
+    def __init__(self, x, y):
         self.x = x
         self.y = y
 
-
     def __repr__(self):
-        return "__repr__<Point x={} ,y={}>".format(self.x ,self.y)
+        return "__repr__<Point x={} ,y={}>".format(self.x, self.y)
 
     def __hash__(self):
-        return self.x + self.y
+        return hash((self.x + self.y))
 
     def __eq__(self, other):
         return self.x + self.y == other.x + other.y
@@ -16,11 +17,28 @@ class Point:
     def __str__(self):
         return "__str__<Point x={} ,y={}>".format(self.x, self.y)
 
-print(hash(Point(4,5)))
-1
+#print(hash(Point(4, 5)))
+#  如果一个类不能被 hash ，就将 __hash__设置成 hash  算法就好了
 
-lst = [Point(1,2),Point(3,4)]
+lst = [Point(1, 2), Point(3, 4)]
 print(lst)
 
-dic = {Point(1,2),Point(1,2)}
+dic = {Point(1, 2), Point(1, 2)}
 print(dic)
+
+p1 = Point(1, 2)
+p2 = Point(1, 3)
+print(p1 == p2)
+
+print(dir(p1))
+
+
+print(hash(p1))
+
+
+
+
+
+
+
+
