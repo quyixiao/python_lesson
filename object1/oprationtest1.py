@@ -29,6 +29,10 @@ class Point:
     def __lt__(self, other):
         return self.x + self.y < other.x + other.y
 
+    def __ge__(self, other):
+        return self.x + self.y >= other.x + other.y
+
+
 
 p1 = Point(4, 4)
 p2 = Point(3, 3)
@@ -48,5 +52,3 @@ print(p1 > p2)
 print(p1 < p2)
 
 print(p1 == p2)
-
-
