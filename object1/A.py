@@ -1,6 +1,18 @@
 import random
 
-
+#  如果 dir ()
+#  分类
+#  创建，初始化与销毁
+#  __init__与__del__
+# hash
+# bool
+# 可视化
+# 运算符的重载
+# 容器的大小
+# 可调用对象
+# 上下文管理
+# 反射
+# 
 class A:
     def __init__(self, name='tom', age=18):
         self.name = name
