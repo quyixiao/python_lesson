@@ -5,7 +5,6 @@ from functools import wraps, update_wrapper
 # 每个地方不同的类型 这个类可以当成一个函数使用，那么，我们就可以将他当成一个函数
 class TimeIt:
     """Time It class """
-
     def __init__(self, fn, output=lambda fn, delta: print("timeit : {} took {} s ".format(fn.__name__, delta))):
         self._fn = fn
         self.output = output
