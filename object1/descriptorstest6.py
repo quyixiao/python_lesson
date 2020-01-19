@@ -36,11 +36,4 @@ class Person:
 
 
 # 这种方法的
-p1 = Person('tom', 123)
-
-
-
-
-
-
-
+p1 = Person('tom', '123')
