@@ -29,8 +29,7 @@ class TypeAssert:
         params = inspect.signature(self.cls).parameters
         print(params)
         for name, param in params.items():
-            print(name, '----------------', param, '-------'
-                  , param.annotation)
+            print(name, '----------------', param, '-------', param.annotation)
             if param.annotation != param.empty:
                 setattr(self.cls, name, TypeCheck(name, param.annotation))
         print('+++++++++++++++++++++', self.cls.__dict__)
