@@ -35,3 +35,39 @@ print(b.x)
 
 print(b.__dict__)
 
+
+
+print('*'*100)
+
+class D :
+    x = [1,2,3]
+    def __init__(self):
+        self._y = 5
+
+    @classmethod
+    def show(self):
+        pass
+
+    show = 1
+    @property
+    def y(self):
+        return self._y
+
+
+d = D()
+d.x = 100
+print(d.__dict__)
+
+print(D.__dict__)
+d._y = 500
+
+
+d.show = 2
+print(D.__dict__)
+
+D.show = 123
+
+print(D.__dict__)
+
+#d.y = 2  # AttributeError: can't set attribute
+d._y = 2
