@@ -15,6 +15,7 @@ class Person:
         self.name = name
         self.age = age
 
+
 print(inspect.signature(Person))
 print(inspect.signature(Person).parameters)
 
