@@ -22,7 +22,8 @@ class ClassMethod:
     #
     def __get__(self, instance, owner):
         print('ClassMethod___get__')
-        return self.fn(owner)  # StaticMethod 类型的对象 s_mtd
+        # return self.fn(owner)  # StaticMethod 类型的对象 s_mtd
+        return partial(self.fn, owner)  # 使用偏函数，这两个装饰器本质是一样的
 
 
 class A:
@@ -39,4 +40,4 @@ class A:
 
 
 A.s_mtd()  # StaticMethod 类型的实例
-A.c_mtd  # 可调用，函数，可调用对象
+A.c_mtd()  # 可调用，函数，可调用对象
