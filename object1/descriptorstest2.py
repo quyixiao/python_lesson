@@ -7,6 +7,8 @@ class A:
         print('A__init__')
     def __set__(self, instance, value):
         print(3,self,instance,value)
+        return instance
+
 
     def __get__(self, instance, owner):
         print(4,self,instance,owner)
@@ -16,11 +18,14 @@ class B:
     x = A(1111)
     def __init__(self):
         print('B___init__')
+        self.a1 = 'b1'
+
 
 
 print(5,B.x)
 b = B()
 print(6,b.x)
+print(7,b.a1 )
 
 
 
