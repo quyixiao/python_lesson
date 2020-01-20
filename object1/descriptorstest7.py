@@ -1,6 +1,7 @@
 import inspect
 
-
+# 如果一个类的类属性设置了描述器，那么它被称为 ower 属主
+#
 class TypeCheck:
     def __init__(self, key, type):
         self.key = key
