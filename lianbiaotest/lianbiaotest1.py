@@ -21,6 +21,7 @@ class LinkedList:
     def __init__(self):
         self.head = None
         self.tail = None
+        self.items = []
 
     def append(self, item):
         """尾部追加"""
@@ -35,6 +36,7 @@ class LinkedList:
             tail.next = node  # 当前尾部的下一个指向新的node
             node.prev = tail
         self.tail = node
+        self.items.append(node )
         return self
 
     def pop(self):
@@ -54,6 +56,8 @@ class LinkedList:
         else:
             node.prev.next = None
             self.tail = node.prev
+
+        self.items.pop()
         return node
 
     def insert(self, index, item):
@@ -80,6 +84,8 @@ class LinkedList:
             node.next = current
             node.prev = prev
 
+        self.items.insert(index,node)
+
     def remove(self, index):
         if index < 0:
             raise IndexError('Wrong index {} '.format(index))
@@ -103,6 +109,7 @@ class LinkedList:
                 break
         else:
             self.pop()
+            self.items.pop()
             return index
 
         prev = current.prev
@@ -119,7 +126,10 @@ class LinkedList:
             prev.next = next
             next.prev = prev
         del current
+
+        self.items.pop(index)
         return index
+
 
     def iternodes(self, reverse=False):
         current = self.tail if reverse else self.head
