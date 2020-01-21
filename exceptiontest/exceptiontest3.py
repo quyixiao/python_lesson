@@ -8,8 +8,8 @@ except Exception('Exception')  as e:
     print('Exception')
 finally:
     try:
-        if f :
-            f.closed
+        if f:
+            f.close()
     except:
         pass
 
