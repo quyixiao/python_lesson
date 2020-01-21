@@ -22,7 +22,7 @@ for x in g:
 print({(x,x + 1) for x in range(10)})
 
 # 这个是一个错误的
-#print({[x] for x in range(20)})
+#print({[x] for x in range(20)})idie
 
 #print({(x,[2]) for x in range(10)}) 这个也是错误的
 

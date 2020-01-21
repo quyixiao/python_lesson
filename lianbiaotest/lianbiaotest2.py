@@ -1,5 +1,4 @@
-# 用面向对象的列表
-# 结点
+
 
 class SingleNode:
     """结点类"""
@@ -21,6 +20,10 @@ class LinkedList:
         self.head = None
         self.tail = None
         self.items = []
+        self.size = 0 # 当多线程之后，就会出现size的问题
+
+    def __len__(self):
+        return len(self.items)
 
     def append(self, item):
         """尾部追加"""
@@ -136,6 +139,16 @@ class LinkedList:
             current = current.prev if reverse else current.next
 
 
+    def __iter__(self):
+        return iter(self.iternodes())
+
+    def __getitem__(self, index):
+        return self.items[index].item
+
+    def __setitem__(self, index, value):
+        self.items[index].item = value
+
+
 ll = LinkedList()
 ll.append('abc').append('def').append('111111').append('2222222').append('333333').append('4444444')
 ll.insert(2, 'xxx')
@@ -152,3 +165,15 @@ for x in ll.iternodes():
 # print('------------------------')
 # for x in ll.iternodes():
 #     print(x)
+
+
+print('===============容器化===============================')
+print(len(ll))
+print(ll[2])
+for x in ll:
+    print(x )
+
+
+print('-------------test==-------------------------')
+
+
