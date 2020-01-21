@@ -7,6 +7,10 @@ try:
 except Exception('Exception')  as e:
     print('Exception')
 finally:
-    if f :
-        f.closed
+    try:
+        if f :
+            f.closed
+    except:
+        pass
+
     print('finally ')
