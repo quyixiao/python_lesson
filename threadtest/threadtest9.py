@@ -1,7 +1,12 @@
 import logging
 import threading
 import time
+
 # 上例说明，如果有non-daemon线程的时候，主线程退出，也不会杀掉
+# 如果我在线程内部启动这样的问题的话，
+#
+
+
 
 FORMAT = '%(asctime)-15s \t [%(threadName)s ,%(thread)8d] %(message)s'
 logging.basicConfig(level=logging.INFO, format=FORMAT)
@@ -14,11 +19,12 @@ def worker():
 
 
 def worker1():
-    time.sleep(2)
+    time.sleep(3)
     logging.info(" {} is running {} ".format(threading.current_thread().name, 5))
 
 
-threading.Thread(target=worker1, name='worker-xxx', daemon=False).start()
+t1 = threading.Thread(target=worker1, name='worker-xyz', daemon=True)
+t1.start()
 
 ts = []
 for i in range(1, 6):
@@ -27,6 +33,9 @@ for i in range(1, 6):
     ts.append(t)
 
 for t in ts:
+    time.sleep(1)
     t.start()
 
+t1.join()
+print(threading.enumerate())
 logging.info('-------------fin-------------------------')
