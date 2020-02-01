@@ -17,7 +17,7 @@ import time
 # 不使用锁，有了效率，但是结果是对的
 # 所以，我们为了效率要错误的结果是对的
 # 所以，我们是为了效率，要正确的结果，让计算机去计算吧
-#
+# 可重入锁
 
 FORMAT = '%(asctime)-15s \t [%(threadName)s ,%(thread)8d] %(message)s'
 logging.basicConfig(level=logging.INFO, format=FORMAT)
