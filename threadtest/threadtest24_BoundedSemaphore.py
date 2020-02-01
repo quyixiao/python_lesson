@@ -48,6 +48,7 @@ def worker1(sema: threading.Semaphore):
         logging.info("{} {} ".format(i, sema.__dict__))
 
 
+
 t = threading.Thread(target=worker1, args=(semaphore,))
 t.start()
 t.join()
