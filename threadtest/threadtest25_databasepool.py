@@ -5,6 +5,8 @@ import threading
 import time
 
 from threading import BoundedSemaphore, Semaphore
+from queue import Queue
+
 
 # 先拿的，拿到了就拿到了，没有拿到，就没有拿到的
 # 假设一种极端的情况，
@@ -21,6 +23,16 @@ from threading import BoundedSemaphore, Semaphore
 
 FORMAT = '%(asctime)-15s \t [%(threadName)s ,%(thread)8d] %(message)s'
 logging.basicConfig(level=logging.INFO, format=FORMAT)
+
+
+
+
+
+
+
+
+
+
 
 class Connection:
     def __init__(self, name):
