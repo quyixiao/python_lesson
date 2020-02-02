@@ -18,7 +18,7 @@ start = datetime.datetime.now()
 
 def calc():
     sum = 0
-    for _ in range(20000000):
+    for _ in range(100000000):
         sum += 1
 
 
