@@ -15,6 +15,8 @@ from queue import Queue
 # ，往往需要等待数据，处理完成请求还通过网络IO返回响应
 # 这就是nginx工作模式
 # 绑定的目的就是缓存
+# 缓存，提高，这就是nginx工作的模式
+# 至少这个池用起来
 #
 
 FORMAT = '%(asctime)-15s \t [%(threadName)s ,%(thread)8d] %(message)s'
