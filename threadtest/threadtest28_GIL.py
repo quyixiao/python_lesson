@@ -6,7 +6,10 @@ import time
 
 from threading import BoundedSemaphore, Semaphore
 from queue import Queue
-
+# 注意，不要在代码中出现的print等访问的IO语句
+# 从两段的python在运行时，保证在同一时刻，只能在同一时刻，
+# 由此就引发了一个问题，IO密集型，确实算完了，
+# IO密集型是可用的，
 FORMAT = '%(asctime)-15s \t [%(threadName)s ,%(thread)8d] %(message)s'
 logging.basicConfig(level=logging.INFO, format=FORMAT)
 
