@@ -1,0 +1,35 @@
+import datetime
+import socket
+import threading
+import logging
+import socketserver
+
+FORMAT = '%(asctime)s 【%(levelname)s】 [%(filename)s:%(lineno)d] %(message)s'
+logging.basicConfig(level=logging.INFO, format=FORMAT)
+
+
+class MyHandler(socketserver.BaseRequestHandler):
+
+    def setup(self):
+        pass
+
+    def handle(self):
+        print(self.request)  # new socket 用来recv
+        print(self.client_address)  # raddr
+        print(self.server)  # 如果是这样的话，要了解他们
+        print(self.__dict__)
+        print(self.server.__dict__)
+
+        for i in range(3):
+            print(threading.enumerate())
+            print(threading.current_thread())
+            data = self.request.recvfrom(1024)
+            print(data, self.client_address)
+
+    def finish(self):
+        pass
+
+
+server = socketserver.TCPServer(('0.0.0.0', 9999), MyHandler)
+print(server)
+server.serve_forever()
