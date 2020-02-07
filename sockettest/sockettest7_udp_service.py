@@ -24,6 +24,9 @@ class ChatUdpServer:
             data, raddr = self.socket.recvfrom(1024)
             logging.info(data)
             logging.info(raddr)
+            if data.strip() == b'^hb^':
+                continue
+
             if data.strip() == b'quit':
                 if raddr in self.clients:
                     self.clients.remove(raddr)
