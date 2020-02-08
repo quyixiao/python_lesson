@@ -23,6 +23,18 @@ from sqlalchemy.ext.declarative import declarative_base
 # password:Hello1234
 
 # connnet = 'mysql+?://username:pwd@ip:port/databasename?key=value'.format()
+# ORM
+# ORM 对象关系映射，对象和关系之间的映射，使用面向对象方式来操作数据库
+# 关系模型和Python对象之间的映射
+# table
+# 创建实例类
+# student 类
+# 创建实体类
+# __tablename__ 指定表名
+# Column 类指定对应的字段，必须指定
+# 实例化
+#
+
 import logging
 import enum
 from sqlalchemy import func
