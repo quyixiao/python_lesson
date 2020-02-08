@@ -69,7 +69,29 @@
 # 用来生成代码的程序称为元程序metaprogram，编写这种程序就称为元编程
 # Python语言能够通过反射来实现元编程
 # 可以借助type 来进行元编程，用代码生成代码
-# 
+# ORM ,对象关系映射，对象和关系之间的映射，使用面向对象的方式来操作数据库
+# 关系模型和Python对象之间的映射
+# table=>class ,表中的映射为类
+# row ==>object ，行映射为实例
+# colum=>property，字段映射为属性
+# 举例
+# 有表student,字段为id:int,name:varchar,age:int
+# 映射为python 为
+# class Student
+#   id=?
+#   name=?
+#   age=?
+# 最终得到实例
+# class Student :
+#   def __init__(self):
+#       self.id=?
+#       self.name=?
+#       self.age=?
+# SQLAlchemy
+# SQLALchemy是一个ORM框架
+# 大量的使用了元编程
+# 数据库开发，
+#
 
 
 
