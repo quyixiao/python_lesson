@@ -4,8 +4,6 @@ from sqlalchemy import create_engine, ForeignKey
 from sqlalchemy import Column, Integer, String, Date, Enum, BigInteger
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy import and_, or_, not_
-
-#
 from sqlalchemy.ext.declarative import declarative_base
 # 生产环境很少这样的创建表，都是系统上线的时候由脚本生成
 # 生成环境很少的删除表，宁可废弃都不能删除
@@ -18,7 +16,8 @@ from sqlalchemy.ext.declarative import declarative_base
 # 嫌弃派
 # 开发难度增加，大数据的时候影响插入，修改，删除的效率
 # 在业务层保证数据的唯一性
-#
+# 完整代码
+# 可以不使用外键约束
 # url:jdbc:mysql://172.16.157.238:3306/linzi_biz?characterEncoding=utf-8&allowMultiQueries=true
 # username:ldd_biz
 # password:Hello1234
