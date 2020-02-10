@@ -7,9 +7,18 @@ from webob import Request, Response
 from webob.dec import wsgify
 
 
-@wsgify
-def app(requst: Request) -> Response:
-    return '<h3>python.org</h3>'
+class AttrDict:
+    def __init__(self, d: dict):
+        self.__dict__.update(d)
+
+    def __setattr__(self, key, value):
+        raise NotImplementedError()
+
+    def __repr__(self):
+        return "{}".format(self.__dict__)
+
+    def __len__(self):
+        return len(self.__dict__)
 
 
 class Router:
@@ -51,7 +60,7 @@ class Router:
                 if matcher:  # 正则匹配
                     # 动态为 request 增加属性
                     request.groups = matcher.groups()  # 所有的分组组成的元组，包括命名分组
-                    request.groupdict = matcher.groupdict()  # 命名分组组成的字典
+                    request.groupdict = AttrDict(matcher.groupdict())  # 命名分组组成的字典
                     return handler(request)
 
 
