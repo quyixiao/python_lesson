@@ -1,3 +1,4 @@
+import re
 from wsgiref.util import setup_testing_defaults
 from wsgiref.simple_server import make_server, demo_app
 from urllib.parse import parse_qs
@@ -19,7 +20,15 @@ from webob.dec import wsgify
 #  静态的 WEB服务器，解决路径和文件之间的映射
 # 动态的 WEB服务器解决路径和应用程序之间的映射
 #  所有的 WEB 框架都是如此，都有路由配置
-#
+# 路由功能的实现
+# app 是 WSGI 中的程序，但是，
+# match 方法必须从头开始匹配，只匹配一次
+# serch 方法，只匹配一次
+# fullmatch 方法要完全匹配
+# findall 方法，从头开始，找到所有的匹配的列表
+# finditer 方法，返回找到所有的匹配的迭代器
+# 字典的问题
+#  如果使用字典，key保存的是路径，普通的字典遍历
 @wsgify
 def app(requst: Request) -> Response:
     # return b'<h1>magedu.com</h1>' bytes
@@ -28,20 +37,20 @@ def app(requst: Request) -> Response:
 
 
 class Router:
-    ROUTERTABLE = {}
+    ROUTERTABLE = []
 
     @classmethod
     def register(cls, path):
         def wrapper(handler):
-            cls.ROUTERTABLE[path] = handler
+            cls.ROUTERTABLE.append((re.compile(path), handler))
             return handler
         return wrapper
 
-@Router.register('/')
+@Router.register(r'^/$')
 def indexhandler(request: Request):
     return 'indexhandler'
 
-@Router.register('/python')
+@Router.register(r'^/python$')
 def pythonhandler(request: Request):
     return 'pythonhandler'
 
@@ -59,10 +68,11 @@ class App:
     @wsgify
     def __call__(self, request: Request):
         path = request.path
-        try:
-            return self._Router.ROUTERTABLE.get(path)(request)
-        except:
-            raise Exception('404')
+        for pattern,handler in self._Router.ROUTERTABLE:
+            matcher = pattern.match(path)
+            if matcher:
+                return handler(request)
+        raise Exception('404')
 
 
 httpd = make_server('0.0.0.0', 8000, App())
