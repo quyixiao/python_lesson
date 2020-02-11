@@ -1,26 +1,9 @@
 import re
-from wsgiref.util import setup_testing_defaults
 from wsgiref.simple_server import make_server, demo_app
-from urllib.parse import parse_qs
 from webob import Request, Response
-
 from webob.dec import wsgify
-
+from webarch.myutils.AttrDict import AttrDict
 from webarch.template import render
-
-
-class AttrDict:
-    def __init__(self, d: dict):
-        self.__dict__.update(d)
-
-    def __setattr__(self, key, value):
-        raise NotImplementedError()
-
-    def __repr__(self):
-        return "{}".format(self.__dict__)
-
-    def __len__(self):
-        return len(self.__dict__)
 
 
 class Router:
@@ -136,40 +119,3 @@ class App:
 
         raise Exception('404')
 
-
-# 创建 Router 对象
-idx = Router()
-py = Router('/python')
-# 注册
-App.register(idx, py)
-
-
-@idx.get(r'^/$')
-def indexhandler(request: Request):
-    print(request.groups)
-    print(request.groupdict)
-    return 'indexhandler'
-
-
-@py.get(r'/{id:int}')  # 支持所有的方法访问 ,'/{id:int} #=> '^/(?P<id>\d+)$'
-def pythonhandler(request: Request):
-    res = Response()
-    res.charset = 'utf-8'
-    res.body = 'welcom to ma python'.encode()
-
-    d = {'userlist': [
-        (1, 'tom', 20),
-        (2, 'jerry', 23),
-        (10, 'sam', 30)
-
-    ]}
-    return render('index.html', d)
-
-
-if __name__ == '__main__':
-    httpd = make_server('0.0.0.0', 8000, App())
-    print('SErver on port 8000...')
-    try:
-        httpd.serve_forever()
-    except:
-        httpd.server_close()
