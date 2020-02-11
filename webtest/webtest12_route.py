@@ -59,6 +59,7 @@ class App:
             matcher = pattern.match(path)
             print('method=',request.method.upper())
             if matcher:
+                print(matcher)
                 print(matcher.groups())
                 print(matcher.group(0))
                 print(matcher.group(1))

@@ -56,7 +56,7 @@ t = 'int'
 print('/(?P<{}>){}'.format(name,TYPEPATTERNS.get(t,TYPEPATTERNS['str'])))
 
 print('*'*100)
-src = '/student/{name}/{id:int}/{age:int}'
+src = '/student/{id:int}'
 
 #pattern = r'/{([^{}:]*):([^{}:]*)}'
 pattern = r'/{([^{}:]+):?([^{}:]*)}'
@@ -67,7 +67,7 @@ print(matcher.groups())
 def repl(matcher):
     name = matcher.group(1)
     t = matcher.group(2)
-    return '/(?P<{}>){}'.format(name,TYPEPATTERNS.get(t,TYPEPATTERNS['str']))
+    return '/(?P<{}>{})'.format(name,TYPEPATTERNS.get(t,TYPEPATTERNS['str']))
 
 
 #print(regex.sub(repl,src))
@@ -81,7 +81,7 @@ def parse(src:str):
         res += src[start:matcher.start()]
         name = matcher.group(1)
         t = matcher.group(2)
-        tmp = '/(?P<{}>){}'.format(name, TYPEPATTERNS.get(t, TYPEPATTERNS['str']))
+        tmp = '/(?P<{}>{})'.format(name, TYPEPATTERNS.get(t, TYPEPATTERNS['str']))
         res += tmp
         start = matcher.end()
     else:
@@ -91,3 +91,16 @@ def parse(src:str):
 print(parse(src))
 
 
+print('*'*100)
+prefix = '/python'
+a = prefix.rstrip('/\\')  # 前缀，例如/product
+print(a)
+print('*'*30)
+
+matcher = re.compile(r'^/python/(?P<id>\d+)$').match('/python/123')
+print(matcher.groupdict())
+
+print('*'*30)
+# r'^/(?P<id>\d+)$'
+matcher = re.compile('/(?P<id>[+-]?\d+)').match('/123')
+print(matcher.groupdict())

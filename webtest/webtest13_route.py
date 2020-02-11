@@ -6,7 +6,13 @@ from webob import Request, Response
 
 from webob.dec import wsgify
 
-
+# 构架处理流程
+# 客户端发来的 HTTP请求，被 WSGI服务器处理后传递给 APP的__call__。
+# App 中遍历已经注册的 Routers,Routers 的 match 来判断是不是自己已经处理了，前缀匹配，就看注册的规则，当然 规则
+# 被装饰器已经转换了成了命名分组的正则表达式了
+#  如果由某一个注册的正则表达式匹配，就把获取的参数放到 request 中，并调用注册时映射的 handler 给它传入 request
+# handler 处理后，返回的 response  ，App中拿到这个 response 的数据，返回给最初的 wsgi
+#
 class AttrDict:
     def __init__(self, d: dict):
         self.__dict__.update(d)
