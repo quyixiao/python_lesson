@@ -31,7 +31,7 @@ def parse(line: str, data: dict):
 
 out = StringIO()
 
-with open('index.html', encoding='utf-8') as f:
+with open('../webarch/templates/index.html', encoding='utf-8') as f:
     for line in f:
         # ret = regex.sub(repl, line)
         ret = parse(line, d)

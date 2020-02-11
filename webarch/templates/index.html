@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Tile</title>
+</head>
+
+<body>
+<h1>显示数据</h1>
+    <ul>
+        {% for id,name,age in userlist%}
+        <li>{{loop.index}},{{id}},{{name}},{{age}}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
